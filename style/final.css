@@ -1,0 +1,231 @@
+/* Main Containers */
+body, button {
+  font-family: VT323;
+}
+button {
+  font-size: xx-large;
+}
+
+.outer-container {
+  height: 720px;
+  width: 1280px;
+  background: #eee;
+  border: 5px solid gainsboro;
+}
+
+.game-window {
+  height: 720px;
+  width: 1280px;
+  float: left;
+  position: relative;
+}
+  
+/* Game Section --- Right Section */
+
+#actual_game{
+    height: 720px;
+    width: 1280px;
+    background-color: black;
+    z-index: 10;
+    right: 0px;
+    /* top: -106px; */
+    position: relative;
+}
+
+#game_right_section {
+    height: 600px;
+    width: 320px;
+    position: absolute;
+    left: 960px;
+    top: 0px;
+    color: white;
+    z-index: 1;
+}
+
+#scoreword, #covid_danger, #level {
+  text-align:center;
+  font-size: 60px;
+}
+
+#score_num, #covid_danger_num, #covid_level {
+  text-align: center;
+  font-size: 40px;
+  color: yellow;
+}
+
+#player {
+  position: absolute;
+  width: 62px;
+  left: 600px;
+  top: 300px;
+  z-index: 9;
+}
+
+
+
+/* ----------landing page/main menu-------- */
+#main_menu{
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  z-index: 28;
+  display: none;
+  display: flex;
+  flex-direction: column;
+  top: 0px;
+  align-content: space-around;
+  align-items: center;
+  justify-content: center;
+}
+#menu_bck{
+  height: inherit;
+  width: inherit;
+  position: absolute;
+  z-index: 11;
+}
+
+#header{
+  width: 100%;
+  height: 100px;
+  background-color: #800;
+  border-bottom: 6px;
+  border-bottom-style: groove;
+  font-size: 100px;
+  text-align: center;
+  top: 0;
+  z-index: 11;
+  position: absolute;
+}
+
+.main_btns{
+  display: flex;  /*og: flex*/
+  /* z-index: 1; */
+  /* position: relative; */
+  flex-direction: column;
+  align-items: center;
+  top: 13%;
+  row-gap: 60px;
+}
+
+
+.main_buttons{
+  width: 200px;
+  height: 100px;
+  background-color: #A00;
+  font-size: 40px;
+  text-align: center;
+  /* display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; */
+  z-index: 11;
+}
+
+
+
+/* ---------settings------ */
+#settings_container{
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  width: auto;
+  height: 614.2px;
+}
+#settings_content {
+  display: flex;
+  flex-direction: column;
+  color: white;
+  z-index: 11;
+  position: absolute;
+  align-items: center;
+  padding: 10px;
+  row-gap: 100px;
+  background-color: blue;
+  border: 5px solid gainsboro;
+  top:10px;
+}
+
+#content{
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  row-gap: 30px;
+}
+#GO_container{
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#GO_content{
+  background-color: #A00;
+  color: blue;
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  align-items: center;
+  width:30%;
+  height: 20%;
+  /* top: 30%; */
+  /* z-index:2; */
+}
+
+.slidercontainer {
+  width: 100%; 
+}
+
+/* The slider itself */
+.slider {
+  margin-top: 10px;
+  -webkit-appearance: none;  /* Override default CSS styles */
+  appearance: none;
+  width: 100%; /* Full-width */
+  height: 25px; /* Specified height */
+  background: #d3d3d3; /* Grey background */
+  outline: none; /* Remove outline */
+  opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+  -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+  transition: opacity .2s;
+}
+
+/* Mouse-over effects */
+.slider:hover {
+  opacity: 1; /* Fully shown on mouse-over */
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none; /* Override default look */
+  appearance: none;
+  width: 25px; /* Set a specific slider handle width */
+  height: 25px; /* Slider handle height */
+  background: #04AA6D; /* Green background */
+  cursor: pointer; /* Cursor on hover */
+}
+
+.title{
+  font-size: 60px;
+  text-align: center;
+}
+
+.set_bt, #close_bt{
+  width: 200px;
+  height: 100px;
+  background-color: #a00;
+  border-width: 4px;
+  font-size: 40px;
+}
+
+#diff_buttons{
+  display: flex;
+  flex-direction: row;
+  column-gap: 5px;
+  margin-top: 10px;
+}
+
+#close_button{
+  bottom:0;
+}
+
+/* --------GAME OVER----- */
+
