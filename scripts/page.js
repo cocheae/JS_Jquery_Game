@@ -46,6 +46,13 @@ $(document).ready(function () {
   // ====== Startup ====== 
   
   game_window = $('.game-window');
+  player = $('.player');
+  person = $('.player img');
+
+  
+  
+
+
   
   do settings_behavior();
     while(false);
@@ -60,12 +67,64 @@ $(document).ready(function () {
   $('#tut_container').change(tutorial);
   $('#start_btn').click(function(){
     $('#tut_container').css("display","");
-    
   });
 
 
   
 });
+
+
+function left(){
+  var newPos = parseInt(player.css("left")) - PERSON_SPEED;
+  if (newPos < 0){
+    newPos = 0;
+  }
+  person.attr("src", "src/player/player_left.gif");
+  player.css("left", newPos);
+}
+
+function right(){
+  var newPos = parseInt(player.css("left")) + PERSON_SPEED;
+  if (newPos > maxPersonPosX){
+    newPos = maxPersonPosX;
+  }
+  person.attr("src", "src/player/player_right.gif");
+  player.css("left", newPos);
+}
+
+function up(){
+  var newPos = parseInt(player.css("top")) - PERSON_SPEED;
+  if (newPos < 0){
+    newPos = 0;
+  }
+  person.attr("src", "src/player/player_up.gif");
+  player.css("top", newPos);
+}
+
+function down(){
+  var newPos = parseInt(player.css("top")) + PERSON_SPEED;
+  if (newPos > maxPersonPosY){
+    newPos = maxPersonPosY;
+  }
+  person.attr("src", "src/player/player_down.gif");
+  player.css("top", newPos);
+}
+
+
+
+
+function moveDown (){
+  // console.log("trigerred!");
+  if (LEFT && UP){left(); up();}
+  else if (LEFT && DOWN){left(); down();}
+  else if (RIGHT && UP){right(); up();}
+  else if (RIGHT && DOWN){right(); down();}
+  else if (LEFT){left();}
+  else if (RIGHT){right();}
+  else if (UP){up();}
+  else if (DOWN){down();}
+
+}
 
 function tutorial(){
   if (first_time == 'true'){
@@ -73,15 +132,13 @@ function tutorial(){
     first_time = 'false';
 
     setTimeout(function(){
+      // console.log("I'm waiting");
       $('#GR_container').css("display", "none");
+      $(window).keydown(moveDown);
     }, 3000);
     
   }
 }
-
-
-
-
 
 function game_over(){
   $('#GO_container').css("display","flex" );
@@ -90,24 +147,15 @@ function game_over(){
   $('#score_display').html(game_over_score);
 }
 
-
-
-
-
-
 function settings_behavior(){
   $('#volume').on('input', change_vol);
-
   $('.set_bt').click(choose_diff);
-
   $('#settings_bt').click(function(){
     $('#settings_container').css("display", "flex");
   });
-
   $('#close_bt').click(function(){
     $('#settings_container').css("display", "none");
   });
-
   $('#play_bt').click(function(){
     $('#main_menu').css("display","none");
     $('#menu_bck').css("display", "none");
@@ -118,11 +166,9 @@ function settings_behavior(){
     if (first_time =='false'){
       setTimeout(function(){
         $('#GR_container').css("display", "none");
+        $(window).keydown(moveDown);
       }, 3000);
     }
-
-    
-    
     $('#tut_on').val('false');
 
     // $('#go_trigger').val(true);
@@ -130,14 +176,6 @@ function settings_behavior(){
   });
 
 }
-
-
-
-
-
-
-
-
 
 function choose_diff(event){
   diff = event.target.id;
@@ -173,6 +211,7 @@ document.onkeydown = function(e) {
     if (e.key == 'ArrowRight') RIGHT = true;
     if (e.key == 'ArrowUp') UP = true;
     if (e.key == 'ArrowDown') DOWN = true;
+    moveDown;
 }
 
 // Keyup event handler
@@ -181,6 +220,7 @@ document.onkeyup = function (e) {
     if (e.key == 'ArrowRight') RIGHT = false;
     if (e.key == 'ArrowUp') UP = false;
     if (e.key == 'ArrowDown') DOWN = false;
+    person.attr("src","src/player/player.gif");
 }
 
 
