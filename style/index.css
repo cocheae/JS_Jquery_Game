@@ -310,6 +310,28 @@ button {
   width: 100px;
   top: 300px; 
   left: 600px; 
+  position: absolute; 
+  display: inline-block;
+}
+
+.asteroidSection{
+  /* height: 62px; */
+  /* width: 62px; */
   position: relative; 
   display: inline-block;
 }
+
+.curAstroid{
+  position: relative; 
+  display: inline-block;
+}
+
+.troid{
+  height: 62px;
+  width: 62px;
+  position: relative;
+  /* top: 62px; */
+  /* left: 62px;  */
+  
+}
+

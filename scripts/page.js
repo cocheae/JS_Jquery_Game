@@ -20,7 +20,6 @@ let vaccineOccurrence = 20000;       // Vaccine spawns every 20 seconds
 let vaccineGone = 5000;              // Vaccine disappears in 5 seconds
 let maskOccurrence = 15000;          // Masks spawn every 15 seconds
 let maskGone = 5000;                 // Mask disappears in 5 seconds
-
 // Movement Helpers
 var LEFT = false;
 var RIGHT = false;
@@ -37,6 +36,8 @@ let diff;   //This var holds the diff
 let volume_level; //holds the vol
 var game_over_flag = false;
 var game_over_score = 10;
+let maxAstroidX = 1280;
+let maxAstroidY = 720;
 
 // var first_time = 'true';
 let first_time;
@@ -48,30 +49,38 @@ $(document).ready(function () {
   game_window = $('.game-window');
   player = $('.player');
   person = $('.player img');
+  comet_class = $('.curAstroid');
+  comet = $('#original_troid');
 
   
   
-
-
-  
-  do settings_behavior();
-    while(false);
+  settings_behavior();
 
   $('#go_bt').click(function(){
     $('#GO_container').css("display", "none");
     $('#main_menu').css("display","flex");
     game_over_score = 0;
   });
-  
+
+  $('#play_bt').click(start_game);
+
   $('#go_trigger').change(game_over);
-  $('#tut_container').change(tutorial);
-  $('#start_btn').click(function(){
-    $('#tut_container').css("display","");
-  });
 
-
+  collision();
   
 });
+
+
+
+
+
+
+function collision(){
+  if (isColliding(comet_class, player)){
+    console.log("collision triggered");
+  }
+}
+
 
 
 function left(){
@@ -110,11 +119,7 @@ function down(){
   player.css("top", newPos);
 }
 
-
-
-
 function moveDown (){
-  // console.log("trigerred!");
   if (LEFT && UP){left(); up();}
   else if (LEFT && DOWN){left(); down();}
   else if (RIGHT && UP){right(); up();}
@@ -123,58 +128,73 @@ function moveDown (){
   else if (RIGHT){right();}
   else if (UP){up();}
   else if (DOWN){down();}
-
+  collision();
 }
+
+function game_on(){
+  $('#GR_container').css("display", "flex");
+  setTimeout(function(){
+    $(window).keyup();
+    $(window).keydown(moveDown);
+    $('#GR_container').css("display", "none");
+  }, 3000);
+}
+
+
 
 function tutorial(){
   if (first_time == 'true'){
     $('#tut_container').css("display", "flex");
     first_time = 'false';
-
-    setTimeout(function(){
-      // console.log("I'm waiting");
-      $('#GR_container').css("display", "none");
-      $(window).keydown(moveDown);
-    }, 3000);
-    
   }
 }
 
 function game_over(){
-  $('#GO_container').css("display","flex" );
-  $('#menu_bck').css("display", "");
-  $('#header').css("display", "");
+  front_page(false);
   $('#score_display').html(game_over_score);
 }
 
 function settings_behavior(){
   $('#volume').on('input', change_vol);
+
   $('.set_bt').click(choose_diff);
+
   $('#settings_bt').click(function(){
     $('#settings_container').css("display", "flex");
   });
+  
   $('#close_bt').click(function(){
     $('#settings_container').css("display", "none");
   });
-  $('#play_bt').click(function(){
+}
+
+function start_game(){
+  front_page(true);
+  first_time = $('#tut_on').val();
+  if (first_time == 'true'){
+    $('#tut_on').val('false');
+    $('#tut_container').css("display","flex");
+    $('#start_btn').click(function(){
+      $('#tut_container').css("display","none");
+      game_on();
+    });
+  } else{ game_on(); }
+  
+  // $('#go_trigger').val(true);
+  // $('#go_trigger').change();
+}
+
+function front_page(disapear){
+  if (disapear){
     $('#main_menu').css("display","none");
     $('#menu_bck').css("display", "none");
     $('#header').css("display", "none");
-    first_time = $('#tut_on').val();
-    $('#tut_on').change();
-    $('#GR_container').css("display", "flex");
-    if (first_time =='false'){
-      setTimeout(function(){
-        $('#GR_container').css("display", "none");
-        $(window).keydown(moveDown);
-      }, 3000);
-    }
-    $('#tut_on').val('false');
-
-    // $('#go_trigger').val(true);
-    // $('#go_trigger').change();
-  });
-
+  }
+  else{
+    $('#GO_container').css("display","flex" );
+    $('#menu_bck').css("display", "");
+    $('#header').css("display", "");
+  }
 }
 
 function choose_diff(event){
@@ -273,3 +293,91 @@ function getRandomNumber(min, max){
 
 
 // Element.remove()
+
+function coordinates(){
+  this.startX= 0;
+  this.endX=0;
+  this.startY= 0;
+  this.endY= 0;
+}
+
+function zero_locked(position){
+  var choose = parseInt(getRandomNumber(1,5));
+
+  switch (choose){
+    case 1:
+      position.startX=-50;
+      position.endX=parseInt(getRandomNumber(-50,maxAstroidX));
+      position.startY=parseInt(getRandomNumber(-50,maxAstroidY));
+      position.endY=parseInt(getRandomNumber(-50,maxAstroidY));
+      break;
+    
+    case 2:
+      position.startX=parseInt(getRandomNumber(-50,maxAstroidX));;
+      position.endX=parseInt(getRandomNumber(-50,maxAstroidX));;
+      position.startY=-50;
+      position.endY=parseInt(getRandomNumber(-50,maxAstroidY));
+      break;
+    case 3:
+      position.startX=parseInt(getRandomNumber(-50,maxAstroidX));
+      position.endX=maxAstroidX
+      position.startY=parseInt(getRandomNumber(-50,maxAstroidY));
+      position.endY=parseInt(getRandomNumber(-50,maxAstroidY));
+      break;
+    
+    case 4:
+      position.startX=parseInt(getRandomNumber(-50,maxAstroidX));;
+      position.endX=parseInt(getRandomNumber(-50,maxAstroidX));;
+      position.startY=maxAstroidY;
+      position.endY=parseInt(getRandomNumber(-50,maxAstroidY));
+      break;
+  }
+  return position; 
+}
+
+function virus(piece){
+  this.piece=piece;
+  this.coord=zero_locked(new coordinates);
+  
+  this.fixer=function(){
+    this.piece.css("top", this.coord.startY);
+    this.piece.css("left", this.coord.startX);
+  }
+
+  this.done=function(){
+    var y = parseInt(this.piece.css("top")) == parseInt(this.coord.endY);
+    var x = parseInt(this.piece.css("left")) == parseInt(this.coord.endX);
+
+    return x || y;
+  }
+
+}
+
+var comets = new Array;
+
+function clone_fabric(){
+  var i_d = 'cloneX';
+  for(var i=1; i<8; ++i){
+    // var id_c = i_d.replace("X",i);
+    var clone = comet.clone().attr('id',i_d.replace("X",i));
+    var covid = new virus(clone);
+    covid.fixer;
+    covid.piece.appendTo(comet_class);
+    comets.push(covid);
+    // .appendTo(comet_class);
+  }
+}
+
+function animation(comet, top_end, left_end){
+
+  comet.animate({top:top_end, left:left_end}, 5000);
+
+}
+
+
+
+
+
+
+
+
