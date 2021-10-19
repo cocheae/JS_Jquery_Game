@@ -191,6 +191,10 @@ button {
   font-size: 40px;
 }
 
+/* #normal{
+  border-color: yellow;
+} */
+
 #diff_buttons{
   display: flex;
   flex-direction: row;
@@ -289,6 +293,11 @@ button {
   height: 100px;
 }
 
+#tut_vax{
+  width: 100px;
+  height: 100px;
+}
+
 #tut_mask{
   width:150px;
   height:70px;
@@ -306,32 +315,41 @@ button {
 
 
 .player{
-  height: 100px;
-  width: 100px;
+  /* height: 100px;
+  width: 100px; */
   top: 300px; 
   left: 600px; 
-  position: absolute; 
-  display: inline-block;
+  position: absolute;
+  text-align:center; 
+  width:62px;
+  height:62px;
+  /* display: inline-block; */
 }
 
 .asteroidSection{
-  /* height: 62px; */
-  /* width: 62px; */
+  height: inherit;
+  width: inherit;
   position: relative; 
-  display: inline-block;
+  /* display: inline-block; */
 }
 
 .curAstroid{
-  position: relative; 
-  display: inline-block;
+  /* position: relative;  */
+  /* display: inline-block; */
+  position: absolute;
 }
 
-.troid{
+.curAstroid img{
   height: 62px;
   width: 62px;
-  position: relative;
-  /* top: 62px; */
-  /* left: 62px;  */
-  
 }
 
+#mask, #mask img{
+  width:70px;
+  height:33px;
+}
+
+#vax, #vax img{
+  width:57px;
+  height:57px;
+}

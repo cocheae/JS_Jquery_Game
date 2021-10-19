@@ -25,19 +25,42 @@ var LEFT = false;
 var RIGHT = false;
 var UP = false;
 var DOWN = false;
+
+
+
 var touched = false;
+var mask_on_game=false;
+var vax_on_game=false;
+
+
+var final_score=0;
 
 // ==============================================
 // ============ Functional Code Here ============
 // ==============================================
 
 
-let diff;   //This var holds the diff
-let volume_level; //holds the vol
+let diff=800;   //This var holds the diff
+let speed_default=3
+let danger_default=20;
+
+var game_level=1;
+let speed=speed_default;
+var covid_danger=danger_default;
+let volume_level=0.5; //holds the vol
+
+
 var game_over_flag = false;
-var game_over_score = 10;
+var game_over_score = 0;
+
+
 let maxAstroidX = 1280;
 let maxAstroidY = 720;
+var timeouts = [];
+var ready_to_play=false;
+var masked_on=false;
+var die_sound = new Audio('src/audio/die.mp3'); 
+var collect_sound = new Audio('src/audio/collect.mp3'); 
 
 // var first_time = 'true';
 let first_time;
@@ -49,75 +72,186 @@ $(document).ready(function () {
   game_window = $('.game-window');
   player = $('.player');
   person = $('.player img');
-  comet_class = $('.curAstroid');
-  comet = $('#original_troid');
 
+  cdc = $('.asteroidSection');
+  covid19=$('.curAstroid');
+
+ 
   
   
   settings_behavior();
+  $('#normal').css("border-color", "yellow");
 
   $('#go_bt').click(function(){
     $('#GO_container').css("display", "none");
     $('#main_menu').css("display","flex");
-    game_over_score = 0;
   });
 
   $('#play_bt').click(start_game);
 
   $('#go_trigger').change(game_over);
 
-  collision();
+  $('#covid_danger_num').html(covid_danger);
+  $('#covid_level').html(game_level);
+
+  
   
 });
 
 
+function sanitize(){
+  var contanimant = $('.curAstroid');
 
-
-
-
-function collision(){
-  if (isColliding(comet_class, player)){
-    console.log("collision triggered");
+  for(var i=1; i< contanimant.length; ++i){
+    var viral = $('#'+contanimant[i].id);
+    viral.remove();
   }
+
+  final_score = game_over_score;
+  game_over_score = 0;
+  game_over_flag=false;
+  covid_danger=danger_default;
+  game_level=1;
+  $('#covid_danger_num').html(danger_default);
+  $('#covid_level').html(game_level);
+  $('#score_num').html(game_over_score);
+  
+
+  // player.css('top','300px');
+  // player.css('left','600px');
+
 }
+
+
 
 
 
 function left(){
+  if (game_over_flag || ready_to_play==false){
+    return;
+  }
   var newPos = parseInt(player.css("left")) - PERSON_SPEED;
   if (newPos < 0){
     newPos = 0;
   }
-  person.attr("src", "src/player/player_left.gif");
+  if(masked_on)
+    person.attr("src","src/player/player_masked_left.gif");
+  else
+    person.attr("src", "src/player/player_left.gif");
+
+
+
+
   player.css("left", newPos);
+
+  player_mask_beh();
+
+  player_vax_beh();
+
+
+
 }
 
 function right(){
+  if (game_over_flag || ready_to_play==false){
+    return;
+  }
   var newPos = parseInt(player.css("left")) + PERSON_SPEED;
   if (newPos > maxPersonPosX){
     newPos = maxPersonPosX;
   }
-  person.attr("src", "src/player/player_right.gif");
+  if(masked_on)
+    person.attr("src","src/player/player_masked_right.gif");
+  else
+    person.attr("src", "src/player/player_right.gif");
+
+
+
   player.css("left", newPos);
+
+  player_mask_beh();
+
+  player_vax_beh();
 }
 
 function up(){
+  if (game_over_flag || ready_to_play==false){
+    return;
+  }
   var newPos = parseInt(player.css("top")) - PERSON_SPEED;
   if (newPos < 0){
     newPos = 0;
   }
-  person.attr("src", "src/player/player_up.gif");
+  if(masked_on)
+    person.attr("src","src/player/player_masked_up.gif");
+  else
+    person.attr("src", "src/player/player_up.gif");
+
+
   player.css("top", newPos);
+
+  player_mask_beh();
+
+  player_vax_beh();
+
+
 }
 
 function down(){
+  if (game_over_flag || ready_to_play==false){
+    return;
+  }
   var newPos = parseInt(player.css("top")) + PERSON_SPEED;
   if (newPos > maxPersonPosY){
     newPos = maxPersonPosY;
   }
-  person.attr("src", "src/player/player_down.gif");
+
+  if(masked_on)
+    person.attr("src","src/player/player_masked_down.gif");
+  else
+    person.attr("src", "src/player/player_down.gif");
+
+
+
+
   player.css("top", newPos);
+
+  player_mask_beh();
+
+  player_vax_beh();
+
+
+
 }
+
+function player_vax_beh(){
+  if(vax_on_game){
+    if(isColliding(player,$('#vax'))){
+      vax_on_game=false;
+      $('#vax').remove();
+      collect_sound.play();
+      covid_danger += 2;
+      ++game_level;
+      speed+= 0.2;
+      
+      $('#covid_danger_num').html(covid_danger);
+      $('#covid_level').html(game_level);
+    }
+  }
+}
+
+function player_mask_beh(){
+  if(mask_on_game){
+    if(isColliding(player,$('#mask'))){
+      mask_on_game=false;
+      $('#mask').remove();
+      masked_on=true;
+      collect_sound.play();
+      person.attr("src","src/player/player_masked_left.gif");
+    }
+  }
+}
+
 
 function moveDown (){
   if (LEFT && UP){left(); up();}
@@ -128,16 +262,41 @@ function moveDown (){
   else if (RIGHT){right();}
   else if (UP){up();}
   else if (DOWN){down();}
-  collision();
+
 }
 
 function game_on(){
   $('#GR_container').css("display", "flex");
   setTimeout(function(){
-    $(window).keyup();
-    $(window).keydown(moveDown);
+    $(window).keyup(function(){
+      if (game_over_flag) return; 
+      if(masked_on)
+        person.attr("src","src/player/player_masked.gif");
+      else
+        person.attr("src","src/player/player.gif");
+    });
+
     $('#GR_container').css("display", "none");
+    $(window).keydown(moveDown);
+    spawn();
+    turn_mask_on();
+    turn_vax_on();
+    ready_to_play=true;
   }, 3000);
+
+  setInterval(function(){
+    if(game_over_flag)
+      clearInterval();
+    else if (ready_to_play && !game_over_flag){
+      game_over_score += 40;
+      final_score=game_over_score
+      $('#score_num').html(game_over_score);
+    }
+  },500);
+
+
+  // game_over_score=0;
+
 }
 
 
@@ -151,7 +310,11 @@ function tutorial(){
 
 function game_over(){
   front_page(false);
-  $('#score_display').html(game_over_score);
+  
+  person.attr("src", 'src/player/player.gif');
+  player.css('top', '300px');
+  player.css('left', '620px');
+  sanitize();
 }
 
 function settings_behavior(){
@@ -171,6 +334,7 @@ function settings_behavior(){
 function start_game(){
   front_page(true);
   first_time = $('#tut_on').val();
+
   if (first_time == 'true'){
     $('#tut_on').val('false');
     $('#tut_container').css("display","flex");
@@ -178,7 +342,9 @@ function start_game(){
       $('#tut_container').css("display","none");
       game_on();
     });
-  } else{ game_on(); }
+  } else{ game_on();}
+
+  // ready_to_play=true;
   
   // $('#go_trigger').val(true);
   // $('#go_trigger').change();
@@ -194,23 +360,39 @@ function front_page(disapear){
     $('#GO_container').css("display","flex" );
     $('#menu_bck').css("display", "");
     $('#header').css("display", "");
+    $('#score_display').html(final_score);
   }
 }
 
 function choose_diff(event){
-  diff = event.target.id;
-  switch (diff){
+  // diff = ;
+  switch (event.target.id){
     case "easy":
+      diff = 100; //100milliseconds
+      speed = 1; //speed of asteroids
+      covid_danger=10;
+      danger_default=10;
+      speed_default=1;
       $('#easy').css("border-color", "yellow");
       $('#normal').css("border-color", "");
       $('#hard').css("border-color", "");
       break;
     case "normal":
+      diff = 800; //100milliseconds
+      speed = 3; //speed of asteroids
+      covid_danger=20;
+      danger_default=20;
+      speed_default=3;
         $('#easy').css("border-color", "");
         $('#normal').css("border-color", "yellow");
         $('#hard').css("border-color", "");
       break;
     case "hard":
+      diff = 600; //100milliseconds
+      speed = 5; //speed of asteroids
+      covid_danger=30;
+      danger_default=30;
+      speed_default=5;
       $('#easy').css("border-color", "");
       $('#normal').css("border-color", "");
       $('#hard').css("border-color", "yellow");
@@ -219,9 +401,11 @@ function choose_diff(event){
 
 }
 
-function change_vol(event){
-  volume_level = $('#volume').val();
-  $('#val').html(volume_level);
+function change_vol(){
+  volume_level = parseInt($('#volume').val()) / 100;
+  $('#val').html($('#volume').val());
+  die_sound.volume=volume_level;
+  colllect_sound=volume_level;
 }
 
 
@@ -231,7 +415,6 @@ document.onkeydown = function(e) {
     if (e.key == 'ArrowRight') RIGHT = true;
     if (e.key == 'ArrowUp') UP = true;
     if (e.key == 'ArrowDown') DOWN = true;
-    moveDown;
 }
 
 // Keyup event handler
@@ -240,7 +423,6 @@ document.onkeyup = function (e) {
     if (e.key == 'ArrowRight') RIGHT = false;
     if (e.key == 'ArrowUp') UP = false;
     if (e.key == 'ArrowDown') DOWN = false;
-    person.attr("src","src/player/player.gif");
 }
 
 
@@ -292,92 +474,311 @@ function getRandomNumber(min, max){
 }
 
 
-// Element.remove()
+var id_index=1;
+// var covid_movement=0.5*speed;
+var pick;
 
-function coordinates(){
-  this.startX= 0;
-  this.endX=0;
-  this.startY= 0;
-  this.endY= 0;
-}
-
-function zero_locked(position){
-  var choose = parseInt(getRandomNumber(1,5));
-
-  switch (choose){
-    case 1:
-      position.startX=-50;
-      position.endX=parseInt(getRandomNumber(-50,maxAstroidX));
-      position.startY=parseInt(getRandomNumber(-50,maxAstroidY));
-      position.endY=parseInt(getRandomNumber(-50,maxAstroidY));
-      break;
-    
-    case 2:
-      position.startX=parseInt(getRandomNumber(-50,maxAstroidX));;
-      position.endX=parseInt(getRandomNumber(-50,maxAstroidX));;
-      position.startY=-50;
-      position.endY=parseInt(getRandomNumber(-50,maxAstroidY));
-      break;
-    case 3:
-      position.startX=parseInt(getRandomNumber(-50,maxAstroidX));
-      position.endX=maxAstroidX
-      position.startY=parseInt(getRandomNumber(-50,maxAstroidY));
-      position.endY=parseInt(getRandomNumber(-50,maxAstroidY));
-      break;
-    
-    case 4:
-      position.startX=parseInt(getRandomNumber(-50,maxAstroidX));;
-      position.endX=parseInt(getRandomNumber(-50,maxAstroidX));;
-      position.startY=maxAstroidY;
-      position.endY=parseInt(getRandomNumber(-50,maxAstroidY));
-      break;
-  }
-  return position; 
-}
-
-function virus(piece){
-  this.piece=piece;
-  this.coord=zero_locked(new coordinates);
+function createStrain(){
+  console.log("creating strain...");
+  var variant = covid19.clone(); variant.attr('id', 'clone'+id_index);
+  variant.append("<img src='src/covidstriod.png'/>");
+  variant.appendTo(cdc);
   
-  this.fixer=function(){
-    this.piece.css("top", this.coord.startY);
-    this.piece.css("left", this.coord.startX);
-  }
+  var strain = $('#clone'+id_index);
+  ++id_index; 
+  
+  strain.css('height', '62px');
+  strain.css('width', '62px');  
+  pick = zero_locked(strain);
 
-  this.done=function(){
-    var y = parseInt(this.piece.css("top")) == parseInt(this.coord.endY);
-    var x = parseInt(this.piece.css("left")) == parseInt(this.coord.endX);
+  var rand = parseInt(getRandomNumber(0,3));
 
-    return x || y;
+  if(pick==0){
+    var timeout = setInterval(function(){
+
+
+      if(handler_0(rand, strain)){
+        strain.remove();
+        clearInterval();
+      }
+
+
+
+    },AST_OBJECT_REFRESH_RATE);
+
+    
+    timeouts.push(timeout);
   }
+  if(pick==1){
+    var timeout = setInterval(function(){
+      if(handler_1(rand, strain)){
+        strain.remove();
+        clearInterval();
+      }
+    },AST_OBJECT_REFRESH_RATE);
+    timeouts.push(timeout);
+  }
+  if(pick==2){
+    var timeout = setInterval(function(){
+      if(handler_2(rand, strain)){
+        strain.remove();
+        clearInterval();
+      }
+    },AST_OBJECT_REFRESH_RATE);
+    timeouts.push(timeout);
+  }
+  if(pick==3){
+    var timeout = setInterval(function(){
+      if(handler_3(rand, strain)){
+        strain.remove();
+        clearInterval();
+      }
+    },AST_OBJECT_REFRESH_RATE);
+    timeouts.push(timeout);
+  }
+  
+
+}//createStrain
+
+function zero_locked(strain){
+  switch(parseInt(getRandomNumber(1,20)) % 5){
+    case 0:
+      strain.attr('value',0);
+      strain.css("top", '0px');
+      strain.css("left", parseInt(getRandomNumber(0, maxAstroidX))+'px');
+      return 0;
+    case 1:
+      strain.attr('value',1);
+      strain.css("top", maxAstroidY+'px');
+      strain.css("left", parseInt(getRandomNumber(0, maxAstroidX))+'px');
+      return 1;
+    case 2:
+      strain.attr('value',2);
+      strain.css('top',parseInt(getRandomNumber(0, maxAstroidY))+'px');
+      strain.css('left','0px');
+      return 2;
+    case 3:
+      strain.attr('value',3);
+      strain.css('top',parseInt(getRandomNumber(0, maxAstroidY))+'px'); //anywhere on the Y axis
+      strain.css('left',maxAstroidX+'px'); //bottom
+      return 3;
+    case 4:
+      return zero_locked(strain);
+  }
+}
+
+function handler_0(rand, strain){
+    switch(rand){
+      case 0:
+        return covid_down(strain);
+      case 1:
+        return covid_down(strain) || covid_left(strain);
+      case 2:
+        return covid_down(strain) || covid_right(strain); 
+  }
+}
+
+function handler_1(rand, strain){
+  switch(rand){
+    case 0:
+      return covid_up(strain);
+    case 1:
+      return covid_up(strain) || covid_left(strain);
+    case 2:
+      return covid_up(strain) || covid_right(strain); 
+  }
+}
+
+function handler_2(rand, strain){
+  switch(rand){
+    case 0:
+      return covid_right(strain);
+    case 1:
+      return covid_right(strain) || covid_up(strain);
+    case 2:
+      return covid_right(strain) || covid_down(strain); 
+  }
+}
+
+function handler_3(rand, strain){
+  switch(rand){
+    case 0:
+      return covid_left(strain);
+    case 1:
+      return covid_left(strain) || covid_up(strain);
+    case 2:
+      return covid_left(strain) || covid_down(strain); 
+  }
+}
+
+function spawn(){
+
+  setTimeout(function(){
+    if(game_over_flag!=true && $('.curAstroid').length < 8 && ready_to_play==true){
+      createStrain();
+    }
+    spawn();
+  },diff);
+
+
+
+}//precipitaion
+
+
+var covid_movement = 0.5*speed;
+function covid_left(strain){
+  // var covid_movement = 1*speed;
+  strain.css('left', parseInt(strain.css('left'))-covid_movement);
+  if(isColliding(strain,player)){
+    // console.log("strain:", strain.position(), "player:", player.position());
+    if (masked_on){
+      masked_on=false;
+      return true;
+    }
+    else
+      quarantine();
+    return false;
+  }
+  if(parseInt(strain.css('left')) <= 0)
+    return true;
+
+  return false;
+}
+function covid_right(strain){
+  // var covid_movement = 0.5*speed;
+  strain.css('left', parseInt(strain.css('left'))+covid_movement);
+  if(isColliding(strain,player)){
+    // console.log("strain:", strain.position(), "player:", player.position());
+    if (masked_on){
+      masked_on=false;
+      return true;
+    }
+    else
+      quarantine();
+    return false;
+  }
+  if(parseInt(strain.css('left')) >= maxAstroidX)
+    return true;
+
+  return false;
+}
+
+function covid_up(strain){
+  // var covid_movement = 0.5*speed;
+  strain.css('top', parseInt(strain.css('top'))-covid_movement);
+  if(isColliding(strain,player)){
+    // console.log("strain:", strain.position(), "player:", player.position());
+    if (masked_on){
+      masked_on=false;
+      return true;
+    }else
+      quarantine();
+    return false;
+  }
+  if(parseInt(strain.css('top')) <= 0)
+    return true;
+
+  return false;
+}
+
+function covid_down(strain){
+  // var covid_movement = 0.5*speed;
+  strain.css('top', parseInt(strain.css('top'))+covid_movement);
+
+  if(isColliding(strain,player)){
+    // console.log("strain:", strain.position(), "player:", player.position());
+    if (masked_on){
+      masked_on=false;
+      return true;
+    }
+    else
+      quarantine();
+    return false;
+  }
+  if(parseInt(strain.css('top')) >= maxAstroidY)
+    return true;
+
+  return false;
+}
+
+
+function quarantine(){
+  die_sound.play();
+  for(var i=0; i < timeouts.length; i++){
+    clearTimeout(timeouts[i]);
+  }
+  timeouts=[];
+  game_over_flag=true;
+  ready_to_play=false;
+
+  person.attr('src', 'src/player/player_touched.gif');
+
+  setTimeout(game_over,2000);
 
 }
 
-var comets = new Array;
 
-function clone_fabric(){
-  var i_d = 'cloneX';
-  for(var i=1; i<8; ++i){
-    // var id_c = i_d.replace("X",i);
-    var clone = comet.clone().attr('id',i_d.replace("X",i));
-    var covid = new virus(clone);
-    covid.fixer;
-    covid.piece.appendTo(comet_class);
-    comets.push(covid);
-    // .appendTo(comet_class);
-  }
+function masks_factory(){
+  mask_on_game=true;
+  var mask_factory = covid19.clone(); mask_factory.attr('id', 'mask');
+  mask_factory.append("<img src='src/mask.gif'/>");
+  mask_factory.appendTo(cdc);
+
+  var mask = $('#mask');
+  var mask_y = parseInt(getRandomNumber(5,maxAstroidY-30));
+  var mask_x = parseInt(getRandomNumber(5,maxAstroidX-80));
+  mask.css('top', mask_y);
+  mask.css('left', mask_x);
+
+  setTimeout(function(){
+    if(mask_on_game){
+      mask_on_game=false;
+      mask.remove();
+    }
+    
+    
+  } , maskGone);
+
+
 }
 
-function animation(comet, top_end, left_end){
 
-  comet.animate({top:top_end, left:left_end}, 5000);
-
+function turn_mask_on(){
+  setInterval(function(){
+    if(!mask_on_game && !masked_on && ready_to_play)
+      masks_factory();
+    else if(game_over_flag)
+      clearInterval();
+  },maskOccurrence);
 }
 
 
+function vax_factory(){
+  vax_on_game=true;
+  var vax_factory = covid19.clone(); vax_factory.attr('id', 'vax');
+  vax_factory.append("<img src='src/vacc.gif'/>");
+  vax_factory.appendTo(cdc);
+
+  var vax = $('#vax');
+  var vax_y = parseInt(getRandomNumber(5,maxAstroidY-30));
+  var vax_x = parseInt(getRandomNumber(5,maxAstroidX-80));
+  vax.css('top', vax_y);
+  vax.css('left', vax_x);
+
+  setTimeout(function(){
+    if(vax_on_game){
+      vax_on_game=false;
+      vax.remove();
+    }
+  } , vaccineGone);
+}
 
 
-
-
-
-
+function turn_vax_on(){
+  setInterval(function(){
+    if(!vax_on_game && ready_to_play)
+      vax_factory();
+    else if(game_over_flag)
+      clearInterval();
+  },vaccineOccurrence);
+}
