@@ -35,19 +35,25 @@ var vax_on_game=false;
 
 var final_score=0;
 
+const diff_default=800;   //This var holds the diff
+const speed_default=3;
+const danger_default=20;
+const vol_default = 0.5;
 // ==============================================
 // ============ Functional Code Here ============
 // ==============================================
 
 
-let diff=800;   //This var holds the diff
-let speed_default=3
-let danger_default=20;
 
+var diff=diff_default;
 var game_level=1;
-let speed=speed_default;
-var covid_danger=danger_default;
-let volume_level=0.5; //holds the vol
+var speed_init=speed_default;
+var covid_danger_init=danger_default;
+var volume_level_init=vol_default;
+
+var speed=speed_init;
+var covid_danger=covid_danger_init;
+var volume_level=volume_level_init;
 
 
 var game_over_flag = false;
@@ -91,7 +97,7 @@ $(document).ready(function () {
 
   $('#go_trigger').change(game_over);
 
-  $('#covid_danger_num').html(covid_danger);
+  $('#covid_danger_num').html(covid_danger_init);
   $('#covid_level').html(game_level);
 
   
@@ -110,9 +116,10 @@ function sanitize(){
   final_score = game_over_score;
   game_over_score = 0;
   game_over_flag=false;
-  covid_danger=danger_default;
+  covid_danger=covid_danger_init;
   game_level=1;
-  $('#covid_danger_num').html(danger_default);
+  speed=speed_init;
+  $('#covid_danger_num').html(covid_danger_init);
   $('#covid_level').html(game_level);
   $('#score_num').html(game_over_score);
   
@@ -370,32 +377,35 @@ function choose_diff(event){
     case "easy":
       diff = 100; //100milliseconds
       speed = 1; //speed of asteroids
+      speed_init = 1; //speed of asteroids
       covid_danger=10;
-      danger_default=10;
-      speed_default=1;
+      covid_danger_init=10;
       $('#easy').css("border-color", "yellow");
       $('#normal').css("border-color", "");
       $('#hard').css("border-color", "");
+      $('#covid_danger_num').html(covid_danger_init);
       break;
     case "normal":
       diff = 800; //100milliseconds
       speed = 3; //speed of asteroids
+      speed_init = 3; //speed of asteroids
       covid_danger=20;
-      danger_default=20;
-      speed_default=3;
+      covid_danger_init=20;
         $('#easy').css("border-color", "");
         $('#normal').css("border-color", "yellow");
         $('#hard').css("border-color", "");
+        $('#covid_danger_num').html(covid_danger_init);
       break;
     case "hard":
       diff = 600; //100milliseconds
       speed = 5; //speed of asteroids
+      speed_init = 5; //speed of asteroids
       covid_danger=30;
-      danger_default=30;
-      speed_default=5;
+      covid_danger_init=30;
       $('#easy').css("border-color", "");
       $('#normal').css("border-color", "");
       $('#hard').css("border-color", "yellow");
+      $('#covid_danger_num').html(covid_danger_init);
       break;
   }
 
@@ -404,8 +414,10 @@ function choose_diff(event){
 function change_vol(){
   volume_level = parseInt($('#volume').val()) / 100;
   $('#val').html($('#volume').val());
+
   die_sound.volume=volume_level;
-  colllect_sound=volume_level;
+  collect_sound.volume=volume_level;
+
 }
 
 
@@ -615,6 +627,7 @@ function spawn(){
 
   setTimeout(function(){
     if(game_over_flag!=true && $('.curAstroid').length < 8 && ready_to_play==true){
+
       createStrain();
     }
     spawn();
